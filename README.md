@@ -140,18 +140,18 @@ http://127.0.0.1:5000/
 | Feature | Value |
 |----------|-------|
 | Age | 58 |
-| Sex | 1 |
+| Sex | Male |
 | Resting BP | 150 |
 | Cholesterol | 260 |
 | Max Heart Rate | 120 |
 | Oldpeak | 2.3 |
-| cp | 3 |
-| fbs | 1 |
-| restecg | 1 |
-| exang | 1 |
-| slope | 2 |
-| ca | 2 |
-| thal | 2 |
+| Chest Pain | Asymptomatic |
+| Fasting Blood Sugar | Greater than 120 mg/dl |
+| Rest ECG | ST-T-abnormalilty |
+| Exercise Included Angina | Yes |
+| Slope | Flat |
+| CA | 2 |
+| Thal | Reversible Defect |
 
 ---
 
