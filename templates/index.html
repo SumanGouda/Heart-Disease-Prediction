@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heart Disease Risk Assessment</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Heart Disease Risk Assessment</h1>
+            <p class="subtitle">Clinical decision-support tool — for use by a healthcare professional alongside their own judgment. Not a diagnosis.</p>
+        </header>
+
+        {% if model_load_error %}
+        <div class="alert alert-error">
+            Model could not be loaded: {{ model_load_error }}. Make sure
+            <code>model/heart_disease_rf_model.pkl</code> exists.
+        </div>
+        {% endif %}
+
+        <form action="/predict" method="post" class="risk-form">
+            <div class="form-grid">
+
+                <div class="field">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" name="age" min="1" max="120" required
+                           value="{{ form_values.age if form_values else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="sex">Sex</label>
+                    <select id="sex" name="sex" required>
+                        <option value="1" {% if form_values and form_values.sex == 1 %}selected{% endif %}>Male</option>
+                        <option value="0" {% if form_values and form_values.sex == 0 %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="cp">Chest Pain Type</label>
+                    <select id="cp" name="cp" required>
+                        <option value="0" {% if form_values and form_values.cp == 0 %}selected{% endif %}>Typical angina</option>
+                        <option value="1" {% if form_values and form_values.cp == 1 %}selected{% endif %}>Atypical angina</option>
+                        <option value="2" {% if form_values and form_values.cp == 2 %}selected{% endif %}>Non-anginal pain</option>
+                        <option value="3" {% if form_values and form_values.cp == 3 %}selected{% endif %}>Asymptomatic</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="trestbps">Resting Blood Pressure (mm Hg)</label>
+                    <input type="number" id="trestbps" name="trestbps" min="50" max="250" required
+                           value="{{ form_values.trestbps if form_values else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="chol">Serum Cholesterol (mg/dl)</label>
+                    <input type="number" id="chol" name="chol" min="50" max="700" required
+                           value="{{ form_values.chol if form_values else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="fbs">Fasting Blood Sugar &gt; 120 mg/dl</label>
+                    <select id="fbs" name="fbs" required>
+                        <option value="0" {% if form_values and form_values.fbs == 0 %}selected{% endif %}>No</option>
+                        <option value="1" {% if form_values and form_values.fbs == 1 %}selected{% endif %}>Yes</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="restecg">Resting ECG Result</label>
+                    <select id="restecg" name="restecg" required>
+                        <option value="0" {% if form_values and form_values.restecg == 0 %}selected{% endif %}>Normal</option>
+                        <option value="1" {% if form_values and form_values.restecg == 1 %}selected{% endif %}>ST-T wave abnormality</option>
+                        <option value="2" {% if form_values and form_values.restecg == 2 %}selected{% endif %}>Left ventricular hypertrophy</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="thalach">Max Heart Rate Achieved</label>
+                    <input type="number" id="thalach" name="thalach" min="50" max="250" required
+                           value="{{ form_values.thalach if form_values else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="exang">Exercise-Induced Angina</label>
+                    <select id="exang" name="exang" required>
+                        <option value="0" {% if form_values and form_values.exang == 0 %}selected{% endif %}>No</option>
+                        <option value="1" {% if form_values and form_values.exang == 1 %}selected{% endif %}>Yes</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="oldpeak">ST Depression (Oldpeak)</label>
+                    <input type="number" id="oldpeak" name="oldpeak" min="0" max="10" step="0.1" required
+                           value="{{ form_values.oldpeak if form_values else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="slope">Slope of Peak Exercise ST Segment</label>
+                    <select id="slope" name="slope" required>
+                        <option value="0" {% if form_values and form_values.slope == 0 %}selected{% endif %}>Upsloping</option>
+                        <option value="1" {% if form_values and form_values.slope == 1 %}selected{% endif %}>Flat</option>
+                        <option value="2" {% if form_values and form_values.slope == 2 %}selected{% endif %}>Downsloping</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="ca">Major Vessels Colored by Fluoroscopy</label>
+                    <select id="ca" name="ca" required>
+                        <option value="0" {% if form_values and form_values.ca == 0 %}selected{% endif %}>0</option>
+                        <option value="1" {% if form_values and form_values.ca == 1 %}selected{% endif %}>1</option>
+                        <option value="2" {% if form_values and form_values.ca == 2 %}selected{% endif %}>2</option>
+                        <option value="3" {% if form_values and form_values.ca == 3 %}selected{% endif %}>3</option>
+                        <option value="4" {% if form_values and form_values.ca == 4 %}selected{% endif %}>4</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="thal">Thalassemia</label>
+                    <select id="thal" name="thal" required>
+                        <option value="0" {% if form_values and form_values.thal == 0 %}selected{% endif %}>Unknown / not tested</option>
+                        <option value="1" {% if form_values and form_values.thal == 1 %}selected{% endif %}>Fixed defect</option>
+                        <option value="2" {% if form_values and form_values.thal == 2 %}selected{% endif %}>Normal</option>
+                        <option value="3" {% if form_values and form_values.thal == 3 %}selected{% endif %}>Reversible defect</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="submit-btn">Assess Risk</button>
+        </form>
+
+        {% if result %}
+        <div class="result-card risk-{{ result.risk_level | lower }}">
+            <h2>Risk Assessment Result</h2>
+            <p class="risk-score">{{ result.risk_percent }}%</p>
+            <p class="risk-label">{{ result.risk_level }} Risk</p>
+            <p class="disclaimer">
+                This score reflects statistical patterns from a clinical dataset and is intended
+                to support, not replace, clinical judgment. It should be interpreted alongside the
+                patient's full history and presentation.
+            </p>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>For clinical decision support only. Not a certified diagnostic device.</p>
+        </footer>
+    </div>
+</body>
+</html>
