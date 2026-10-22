@@ -9,8 +9,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy the rest of the app
 COPY . .
-
-# Hugging Face Spaces (Docker SDK) expects the app to listen on port 7860
+ 
 EXPOSE 7860
 
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]

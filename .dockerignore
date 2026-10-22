@@ -59,7 +59,9 @@ Thumbs.db
 logs/
 
 # ==============================
-# Docker
+# Docker & Custom
 # ==============================
 Dockerfile
 .dockerignore
+trash/
+cmd.txt
