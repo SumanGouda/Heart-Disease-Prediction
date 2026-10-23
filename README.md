@@ -1,189 +1,95 @@
-# 🫀 Heart Disease Prediction Web App
+# Heart Disease Risk Prediction
 
-A Machine Learning powered web application that predicts the risk of heart disease based on medical input parameters.
+A web app that estimates a person's risk of heart disease from 13 clinical measurements. A Random Forest model, tuned with cross-validated grid search, sits behind a FastAPI backend with a simple HTML form. The whole thing is Dockerized, so you can run it with one command.
 
-Built using:
-- 🐍 Python
-- 🤖 Scikit-Learn
-- 🌐 Flask
-- 🎨 HTML & CSS
+> **Disclaimer:** This is a learning and portfolio project. It is not a medical device and must not be used for diagnosis or treatment decisions.
 
----
-
-## 🚀 Project Overview
-
-This application allows users to enter medical details such as age, blood pressure, cholesterol levels, and more.
-
-The trained ML model predicts:
-- ✅ Low Risk of Heart Disease
-- ⚠️ High Risk of Heart Disease
-
-It also displays the model confidence score.
-
----
-
-## 📊 Machine Learning Model
-
-- Algorithm: Logistic Regression *(or replace with your algorithm name)*
-- Dataset: UCI Heart Disease Dataset
-- Target Variable: Presence of Heart Disease (0 = No, 1 = Yes)
-
-### Features Used:
-- Age
-- Sex
-- Chest Pain Type (cp)
-- Resting Blood Pressure (trestbps)
-- Cholesterol (chol)
-- Fasting Blood Sugar (fbs)
-- Rest ECG (restecg)
-- Max Heart Rate (thalach)
-- Exercise Induced Angina (exang)
-- Oldpeak
-- Slope
-- CA
-- Thal
-
----
-
-## 🖥️ Web Application Features
-
-- Clean and simple user interface
-- Styled input forms
-- Dynamic prediction result page
-- Model confidence percentage display
-- Responsive layout
-- Custom styled buttons
-
----
-
-## 📂 Project Structure
-
-```
-Heart-Disease-Prediction/
-│
-├── static/
-│   └── style.css
-│
-├── templates/
-│   ├── index.html
-│   └── result.html
-│
-├── model.pkl
-├── app.py
-├── requirements.txt
-└── README.md
-```
-
----
-
-## ⚙️ Installation & Setup
-
-### 1️⃣ Clone the Repository
+## Quick start (Docker)
 
 ```bash
-git clone https://github.com/yourusername/heart-disease-prediction.git
-cd heart-disease-prediction
+docker run -p 7860:7860 sumangouda/heart-disease-api:latest
 ```
 
----
+Then open [http://localhost:7860](http://localhost:7860), fill in the form, and submit.
 
-### 2️⃣ Create Virtual Environment (Recommended)
+## What it does
 
-```bash
-python -m venv venv
-```
+1. You enter 13 clinical values in the web form.
+2. The backend builds a one-row DataFrame in the exact column order the model was trained on.
+3. The model returns a heart-disease risk percentage, shown as **Low**, **Moderate**, or **High**.
 
-Activate it:
+| Risk percent | Level |
+|---|---|
+| below 30 | Low |
+| 30 to 59.9 | Moderate |
+| 60 and above | High |
 
-**Windows:**
-```bash
-venv\Scripts\activate
-```
+## Input features
 
-**Mac/Linux:**
-```bash
-source venv/bin/activate
-```
+| Feature | Description |
+|---|---|
+| `age` | Age in years |
+| `sex` | 1 = male, 0 = female |
+| `cp` | Chest pain type (0 to 3) |
+| `trestbps` | Resting blood pressure (mm Hg) |
+| `chol` | Serum cholesterol (mg/dl) |
+| `fbs` | Fasting blood sugar above 120 mg/dl (1 = yes, 0 = no) |
+| `restecg` | Resting ECG result (0 to 2) |
+| `thalach` | Maximum heart rate achieved |
+| `exang` | Exercise-induced angina (1 = yes, 0 = no) |
+| `oldpeak` | ST depression induced by exercise relative to rest |
+| `slope` | Slope of the peak exercise ST segment (0 to 2) |
+| `ca` | Number of major vessels colored by fluoroscopy (0 to 4) |
+| `thal` | Thalassemia result (categorical code) |
 
----
+## Model
 
-### 3️⃣ Install Dependencies
+The dataset is the classic heart disease dataset (303 rows, 13 features plus a binary target), stored in `data/heart.csv`. Three classifiers were tuned with `GridSearchCV` (5-fold, scored by ROC AUC) on an 80/20 train/test split:
+
+| Model | Best CV AUC | Test accuracy |
+|---|---|---|
+| **Random Forest** | **0.9134** | **0.8852** |
+| XGBoost | 0.9036 | 0.8525 |
+| Decision Tree | 0.7968 | 0.8361 |
+
+Random Forest and XGBoost were then compared with 10-fold cross-validation on the full data. Random Forest scored 0.9157 ± 0.0406 AUC against 0.9073 ± 0.0374 for XGBoost, so Random Forest was saved as the final model (`model/heart_disease_rf_model.pkl`).
+
+Best Random Forest parameters: `n_estimators=300`, `max_depth=5`, `min_samples_split=5`, `min_samples_leaf=2`.
+
+**Note on the target:** in this version of the dataset, `target = 1` is the healthier outcome and `0` means disease is present. The app therefore reports risk as the predicted probability of class 0, not class 1.
+
+## Run locally (without Docker)
 
 ```bash
 pip install -r requirements.txt
-```
-
-If `requirements.txt` is not available:
-
-```bash
-pip install flask scikit-learn numpy pandas
-```
-
----
-
-### 4️⃣ Run the Application
-
-```bash
 python app.py
 ```
 
-Open your browser and go to:
+The app starts at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+## Retrain the model
+
+Open `notebook/Heart Disease Prediction.ipynb` and run all cells. The last cell saves `heart_disease_rf_model.pkl`. Move it into the `model/` folder, keeping the same 13-column feature order, before restarting the app.
+
+## Project structure
 
 ```
-http://127.0.0.1:5000/
+.
+├── app.py                  # FastAPI app: form page and /predict endpoint
+├── Dockerfile
+├── requirements.txt
+├── data/
+│   └── heart.csv           # dataset
+├── model/
+│   └── heart_disease_rf_model.pkl
+├── notebook/
+│   └── Heart Disease Prediction.ipynb   # EDA, tuning, model comparison
+├── static/
+│   └── style.css
+└── templates/
+    └── index.html          # Jinja2 form and result page
 ```
 
----
+## Tech stack
 
-## 🧪 Example Test Data
-
-| Feature | Value |
-|----------|-------|
-| Age | 58 |
-| Sex | Male |
-| Resting BP | 150 |
-| Cholesterol | 260 |
-| Max Heart Rate | 120 |
-| Oldpeak | 2.3 |
-| Chest Pain | Asymptomatic |
-| Fasting Blood Sugar | Greater than 120 mg/dl |
-| Rest ECG | ST-T-abnormalilty |
-| Exercise Included Angina | Yes |
-| Slope | Flat |
-| CA | 2 |
-| Thal | Reversible Defect |
-
----
-
-## 📈 Future Improvements
-
-- Add model accuracy display
-- Add feature importance visualization
-- Deploy to cloud (Render / Railway / AWS)
-- Improve UI animations
-- Add authentication system
-- Add dashboard analytics
-
----
-
-## 🛠️ Tech Stack
-
-| Technology | Purpose |
-|------------|----------|
-| Python | Backend Logic |
-| Flask | Web Framework |
-| Scikit-Learn | Machine Learning |
-| HTML | Structure |
-| CSS | Styling |
-
----
-
-## 📌 Disclaimer
-
-This project is for educational purposes only and should not be used as a substitute for professional medical advice.
-
----
-
-## 👨‍💻 Author
-
-Developed by **Suman**
+Python, scikit-learn, XGBoost, pandas, FastAPI, Jinja2, Docker.
