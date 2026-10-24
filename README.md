@@ -6,11 +6,20 @@ A web app that estimates a person's risk of heart disease from 13 clinical measu
 
 ## Quick start (Docker)
 
+Pull and run the published image:
+
 ```bash
 docker run -p 7860:7860 sumangouda/heart-disease-api:latest
 ```
 
-Then open [http://localhost:7860](http://localhost:7860), fill in the form, and submit.
+Then open [http://localhost:7860](http://localhost:7860), fill in the form, and submit. Use `localhost`, not `0.0.0.0`; the latter is only the container's bind address and won't load in a browser.
+
+Or build the image yourself from this repo:
+
+```bash
+docker build -t heart-disease-api .
+docker run -p 7860:7860 heart-disease-api
+```
 
 ## What it does
 
